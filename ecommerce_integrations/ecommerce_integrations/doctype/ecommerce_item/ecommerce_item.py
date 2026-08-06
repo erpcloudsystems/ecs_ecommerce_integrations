@@ -154,7 +154,12 @@ def create_ecommerce_item(
 
 	new_item = frappe.get_doc(item)
 	new_item.flags.from_integration = True
-	new_item.insert(ignore_permissions=True, ignore_mandatory=True)
+	try:
+		new_item.insert(ignore_permissions=True, ignore_mandatory=True)
+	except frappe.DuplicateEntryError:
+		# an Item with this item_code already exists (e.g. created manually before
+		# the integration synced it) - link the existing item instead of failing
+		new_item = frappe.get_doc("Item", item["item_code"])
 
 	ecommerce_item = frappe.get_doc(
 		{

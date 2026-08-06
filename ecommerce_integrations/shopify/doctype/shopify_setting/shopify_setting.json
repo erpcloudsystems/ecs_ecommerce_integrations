@@ -25,6 +25,7 @@
   "cost_center",
   "section_break_25",
   "sales_order_series",
+  "price_list",
   "delivery_note_series",
   "sales_invoice_series",
   "shipping_item",
@@ -185,6 +186,13 @@
    "fieldtype": "Select",
    "label": "Sales Order Series",
    "mandatory_depends_on": "eval:doc.enable_shopify"
+  },
+  {
+   "description": "Optional. If left empty, a dedicated empty Price List (\"Ecommerce Integrations - Ignore\") is used instead, so that no ERPNext Item Price overrides the rate coming from Shopify. Item rates are always taken as-is from Shopify regardless of this setting (Ignore Pricing Rule is always enabled on synced Sales Orders).",
+   "fieldname": "price_list",
+   "fieldtype": "Link",
+   "label": "Price List",
+   "options": "Price List"
   },
   {
    "fieldname": "column_break_27",
