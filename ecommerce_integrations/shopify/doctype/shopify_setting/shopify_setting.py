@@ -18,7 +18,9 @@ from ecommerce_integrations.shopify.constants import (
 	ADDRESS_ID_FIELD,
 	CUSTOMER_ID_FIELD,
 	FULLFILLMENT_ID_FIELD,
+	ITEM_PRICE_SYNC_FIELD,
 	ITEM_SELLING_RATE_FIELD,
+	ITEM_SYNC_FIELD,
 	ORDER_ID_FIELD,
 	ORDER_ITEM_DISCOUNT_FIELD,
 	ORDER_NUMBER_FIELD,
@@ -114,7 +116,23 @@ def setup_custom_fields():
 				label="Shopify Selling Rate",
 				fieldtype="Currency",
 				insert_after="standard_rate",
-			)
+			),
+			dict(
+				fieldname=ITEM_SYNC_FIELD,
+				label="Sync Item with Shopify",
+				fieldtype="Check",
+				insert_after="disabled",
+				default="1",
+				description="If unchecked, this item's details will not be created or updated on Shopify.",
+			),
+			dict(
+				fieldname=ITEM_PRICE_SYNC_FIELD,
+				label="Sync Price with Shopify",
+				fieldtype="Check",
+				insert_after=ITEM_SYNC_FIELD,
+				default="1",
+				description="If unchecked, price changes for this item will not be pushed to Shopify. Other item details will still sync.",
+			),
 		],
 		"Customer": [
 			dict(

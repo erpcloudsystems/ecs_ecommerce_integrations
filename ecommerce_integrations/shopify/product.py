@@ -9,7 +9,9 @@ from shopify.resources import Product, Variant
 from ecommerce_integrations.ecommerce_integrations.doctype.ecommerce_item import ecommerce_item
 from ecommerce_integrations.shopify.connection import temp_shopify_session
 from ecommerce_integrations.shopify.constants import (
+	ITEM_PRICE_SYNC_FIELD,
 	ITEM_SELLING_RATE_FIELD,
+	ITEM_SYNC_FIELD,
 	MODULE_NAME,
 	SETTING_DOCTYPE,
 	SHOPIFY_VARIANTS_ATTR_LIST,
@@ -337,6 +339,10 @@ def upload_erpnext_item(doc, method=None):
 
 	New items are pushed to shopify and changes to existing items are
 	updated depending on what is configured in "Shopify Setting" doctype.
+
+	Per-item checkboxes on `Item` further control this: `sync_with_shopify`
+	disables all push (create/update) to Shopify when unchecked, and
+	`sync_price_with_shopify` skips only the price update when unchecked.
 	"""
 	template_item = item = doc  # alias for readability
 	# a new item recieved from ecommerce_integrations is being inserted
@@ -346,6 +352,9 @@ def upload_erpnext_item(doc, method=None):
 	setting = frappe.get_doc(SETTING_DOCTYPE)
 
 	if not setting.is_enabled() or not setting.upload_erpnext_items:
+		return
+
+	if not item.get(ITEM_SYNC_FIELD):
 		return
 
 	if frappe.flags.in_import:
@@ -384,7 +393,7 @@ def upload_erpnext_item(doc, method=None):
 			update_default_variant_properties(
 				product,
 				sku=template_item.item_code,
-				price=template_item.get(ITEM_SELLING_RATE_FIELD),
+				price=get_synced_price(template_item),
 				is_stock_item=template_item.is_stock_item,
 			)
 			if item.variant_of:
@@ -393,8 +402,10 @@ def upload_erpnext_item(doc, method=None):
 				variant_attributes = {
 					"title": template_item.item_name,
 					"sku": item.item_code,
-					"price": item.get(ITEM_SELLING_RATE_FIELD),
 				}
+				price = get_synced_price(item)
+				if price is not None:
+					variant_attributes["price"] = price
 				max_index_range = min(3, len(template_item.attributes))
 				for i in range(0, max_index_range):
 					attr = template_item.attributes[i]
@@ -441,10 +452,13 @@ def upload_erpnext_item(doc, method=None):
 				update_default_variant_properties(
 					product,
 					is_stock_item=template_item.is_stock_item,
-					price=item.get(ITEM_SELLING_RATE_FIELD),
+					price=get_synced_price(item),
 				)
 			else:
-				variant_attributes = {"sku": item.item_code, "price": item.get(ITEM_SELLING_RATE_FIELD)}
+				variant_attributes = {"sku": item.item_code}
+				price = get_synced_price(item)
+				if price is not None:
+					variant_attributes["price"] = price
 				product.options = []
 				max_index_range = min(3, len(template_item.attributes))
 				for i in range(0, max_index_range):
@@ -521,6 +535,13 @@ def map_erpnext_item_to_shopify(shopify_product: Product, erpnext_item):
 		shopify_product.status = "draft"
 		shopify_product.published = False
 		msgprint(_("Status of linked Shopify product is changed to Draft."))
+
+
+def get_synced_price(item) -> float | None:
+	"""Return item's selling rate to push to Shopify, or None if price sync is disabled for this item."""
+	if not item.get(ITEM_PRICE_SYNC_FIELD):
+		return None
+	return item.get(ITEM_SELLING_RATE_FIELD)
 
 
 def get_shopify_weight_uom(erpnext_weight_uom: str) -> str:

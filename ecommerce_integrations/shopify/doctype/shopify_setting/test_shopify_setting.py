@@ -9,7 +9,9 @@ from ecommerce_integrations.shopify.constants import (
 	ADDRESS_ID_FIELD,
 	CUSTOMER_ID_FIELD,
 	FULLFILLMENT_ID_FIELD,
+	ITEM_PRICE_SYNC_FIELD,
 	ITEM_SELLING_RATE_FIELD,
+	ITEM_SYNC_FIELD,
 	ORDER_ID_FIELD,
 	ORDER_ITEM_DISCOUNT_FIELD,
 	ORDER_NUMBER_FIELD,
@@ -45,6 +47,8 @@ class TestShopifySetting(unittest.TestCase):
 				CUSTOMER_ID_FIELD,
 				FULLFILLMENT_ID_FIELD,
 				ITEM_SELLING_RATE_FIELD,
+				ITEM_SYNC_FIELD,
+				ITEM_PRICE_SYNC_FIELD,
 				ORDER_ID_FIELD,
 				ORDER_NUMBER_FIELD,
 				ORDER_STATUS_FIELD,
@@ -53,7 +57,7 @@ class TestShopifySetting(unittest.TestCase):
 			]
 		)
 
-		self.assertGreaterEqual(len(created_fields), 13)
+		self.assertGreaterEqual(len(created_fields), 15)
 		created_fields_set = {d[0] for d in created_fields}
 
 		self.assertEqual(created_fields_set, required_fields)
