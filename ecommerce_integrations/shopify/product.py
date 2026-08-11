@@ -382,7 +382,7 @@ def upload_erpnext_item(doc, method=None):
 		product.published = False
 		product.status = "active" if setting.sync_new_item_as_active else "draft"
 
-		map_erpnext_item_to_shopify(shopify_product=product, erpnext_item=template_item)
+		map_erpnext_item_to_shopify(shopify_product=product, erpnext_item=template_item, setting=setting)
 		is_successful = product.save()
 
 		if is_successful:
@@ -443,7 +443,7 @@ def upload_erpnext_item(doc, method=None):
 	elif setting.update_shopify_item_on_update:
 		product = Product.find(product_id)
 		if product:
-			map_erpnext_item_to_shopify(shopify_product=product, erpnext_item=template_item)
+			map_erpnext_item_to_shopify(shopify_product=product, erpnext_item=template_item, setting=setting)
 			if not item.variant_of:
 				update_default_variant_properties(
 					product,
@@ -514,7 +514,7 @@ def map_erpnext_variant_to_shopify_variant(shopify_product: Product, erpnext_ite
 	return variant_product_id
 
 
-def map_erpnext_item_to_shopify(shopify_product: Product, erpnext_item):
+def map_erpnext_item_to_shopify(shopify_product: Product, erpnext_item, setting):
 	"""Map erpnext fields to shopify, called both when updating and creating new products."""
 
 	shopify_product.title = erpnext_item.item_name
@@ -527,7 +527,7 @@ def map_erpnext_item_to_shopify(shopify_product: Product, erpnext_item):
 		shopify_product.weight = erpnext_item.weight_per_unit
 		shopify_product.weight_unit = uom
 
-	if erpnext_item.disabled:
+	if erpnext_item.disabled and cint(setting.get("sync_status_with_shopify", 1)):
 		shopify_product.status = "draft"
 		shopify_product.published = False
 		msgprint(_("Status of linked Shopify product is changed to Draft."))

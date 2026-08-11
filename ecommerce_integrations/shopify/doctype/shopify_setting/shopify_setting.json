@@ -45,6 +45,7 @@
   "upload_erpnext_items",
   "update_shopify_item_on_update",
   "sync_price_with_shopify",
+  "sync_status_with_shopify",
   "column_break_34",
   "sync_new_item_as_active",
   "upload_variants_as_items",
@@ -264,6 +265,13 @@
    "fieldname": "sync_price_with_shopify",
    "fieldtype": "Check",
    "label": "Update Item Price on Shopify"
+  },
+  {
+   "default": "1",
+   "description": "Applies to all items. If disabled, setting an ERPNext Item as Disabled will no longer set the linked Shopify product to Draft.",
+   "fieldname": "sync_status_with_shopify",
+   "fieldtype": "Check",
+   "label": "Update Item Status on Shopify"
   },
   {
    "depends_on": "eval:doc.update_erpnext_stock_levels_to_shopify",
