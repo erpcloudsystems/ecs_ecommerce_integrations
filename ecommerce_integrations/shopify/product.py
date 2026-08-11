@@ -534,8 +534,13 @@ def map_erpnext_item_to_shopify(shopify_product: Product, erpnext_item):
 
 
 def get_synced_price(item, setting) -> float | None:
-	"""Return item's selling rate to push to Shopify, or None if price sync is disabled globally."""
-	if not setting.sync_price_with_shopify:
+	"""Return item's selling rate to push to Shopify, or None if price sync is disabled globally.
+
+	Uses a default of enabled (1) so existing sites where this setting has never been
+	explicitly saved (missing from the Single doctype's stored values) keep syncing price,
+	same as before this setting existed.
+	"""
+	if not cint(setting.get("sync_price_with_shopify", 1)):
 		return None
 	return item.get(ITEM_SELLING_RATE_FIELD)
 
