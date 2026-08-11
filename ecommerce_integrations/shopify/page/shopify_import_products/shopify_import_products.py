@@ -49,9 +49,11 @@ def fetch_all_products(from_=None):
 @temp_shopify_session
 def _fetch_products_from_shopify(from_=None, limit=20):
 	if from_:
+		# from_ is a full pagination URL (with a page_info cursor) already scoped
+		# to the original query; Shopify rejects extra filters alongside page_info.
 		collection = Product.find(from_=from_)
 	else:
-		collection = Product.find(limit=limit)
+		collection = Product.find(limit=limit, status="active")
 
 	return collection
 
@@ -75,7 +77,7 @@ def get_product_count():
 
 @temp_shopify_session
 def get_shopify_product_count():
-	return Product.count()
+	return Product.count(status="active")
 
 
 @frappe.whitelist()

@@ -44,6 +44,7 @@
   "erpnext_to_shopify_sync_section",
   "upload_erpnext_items",
   "update_shopify_item_on_update",
+  "sync_price_with_shopify",
   "column_break_34",
   "sync_new_item_as_active",
   "upload_variants_as_items",
@@ -256,6 +257,14 @@
    "fieldname": "update_shopify_item_on_update",
    "fieldtype": "Check",
    "label": "Update Shopify Item after updating ERPNext item"
+  },
+  {
+   "default": "1",
+   "depends_on": "eval:doc.update_shopify_item_on_update",
+   "description": "Applies to all items. If disabled, item price changes will not be pushed to Shopify, other item details will still be updated.",
+   "fieldname": "sync_price_with_shopify",
+   "fieldtype": "Check",
+   "label": "Update Item Price on Shopify"
   },
   {
    "depends_on": "eval:doc.update_erpnext_stock_levels_to_shopify",
