@@ -212,6 +212,7 @@ def get_order_taxes(shopify_order, setting, items):
 	taxes = []
 	line_items = shopify_order.get("line_items")
 
+	# Add taxes from line items (products)
 	for line_item in line_items:
 		item_code = get_item_code(line_item)
 		for tax in line_item.get("tax_lines"):
@@ -231,13 +232,33 @@ def get_order_taxes(shopify_order, setting, items):
 				}
 			)
 
-	update_taxes_with_shipping_lines(
-		taxes,
-		shopify_order.get("shipping_lines"),
-		setting,
-		items,
-		taxes_inclusive=shopify_order.get("taxes_included"),
-	)
+	# Add shipping taxes to the existing tax entries (don't create new rows)
+	shipping_lines = shopify_order.get("shipping_lines") or []
+	for shipping_charge in shipping_lines:
+		shipping_taxes = shipping_charge.get("tax_lines") or []
+		for shipping_tax in shipping_taxes:
+			shipping_tax_amount = flt(shipping_tax.get("price"))
+			shipping_tax_rate = flt(shipping_tax.get("rate")) * 100
+			
+			# Find existing tax row with same account and add shipping tax to it
+			tax_account = get_tax_account_head(shipping_tax, charge_type="sales_tax")
+			tax_found = False
+			
+			for existing_tax in taxes:
+				if existing_tax["account_head"] == tax_account:
+					# Add shipping tax amount to existing tax row
+					existing_tax["tax_amount"] = flt(existing_tax["tax_amount"]) + shipping_tax_amount
+					# Add DEL item to item_wise_tax_detail
+					if isinstance(existing_tax["item_wise_tax_detail"], dict):
+						existing_tax["item_wise_tax_detail"]["DEL"] = [shipping_tax_rate, shipping_tax_amount]
+					tax_found = True
+					break
+			
+			# If no matching tax row found, add shipping tax to the first tax row (14% tax)
+			if not tax_found and taxes:
+				taxes[0]["tax_amount"] = flt(taxes[0]["tax_amount"]) + shipping_tax_amount
+				if isinstance(taxes[0]["item_wise_tax_detail"], dict):
+					taxes[0]["item_wise_tax_detail"]["DEL"] = [shipping_tax_rate, shipping_tax_amount]
 
 	if cint(setting.consolidate_taxes):
 		taxes = consolidate_order_taxes(taxes)
