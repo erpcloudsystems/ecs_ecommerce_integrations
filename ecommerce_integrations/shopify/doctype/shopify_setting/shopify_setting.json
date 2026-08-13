@@ -41,6 +41,10 @@
   "default_sales_tax_account",
   "column_break_qibo",
   "default_shipping_charges_account",
+  "cod_charges_section",
+  "cod_fee_account",
+  "column_break_cod",
+  "cod_fee_amount",
   "erpnext_to_shopify_sync_section",
   "upload_erpnext_items",
   "update_shopify_item_on_update",
@@ -241,6 +245,31 @@
    "label": "Shopify Tax Account",
    "mandatory_depends_on": "eval:doc.enable_shopify",
    "options": "Shopify Tax Account"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "cod_charges_section",
+   "fieldtype": "Section Break",
+   "label": "Cash on Delivery (COD) Charges"
+  },
+  {
+   "description": "If set, this account will be charged with the COD Fee Amount whenever a Shopify order's payment gateway indicates Cash on Delivery.",
+   "fieldname": "cod_fee_account",
+   "fieldtype": "Link",
+   "label": "COD Fee Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_break_cod",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "15",
+   "depends_on": "eval:doc.cod_fee_account",
+   "description": "Fixed amount added to the Sales Order's Taxes and Charges table for Cash on Delivery orders.",
+   "fieldname": "cod_fee_amount",
+   "fieldtype": "Currency",
+   "label": "COD Fee Amount"
   },
   {
    "fieldname": "erpnext_to_shopify_sync_section",

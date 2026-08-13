@@ -239,6 +239,10 @@ def get_order_taxes(shopify_order, setting, items):
 		taxes_inclusive=shopify_order.get("taxes_included"),
 	)
 
+	cod_fee = get_cod_fee_tax_row(shopify_order, setting)
+	if cod_fee:
+		taxes.append(cod_fee)
+
 	if cint(setting.consolidate_taxes):
 		taxes = consolidate_order_taxes(taxes)
 
@@ -248,6 +252,30 @@ def get_order_taxes(shopify_order, setting, items):
 			row["item_wise_tax_detail"] = json.dumps(tax_detail)
 
 	return taxes
+
+
+def is_cash_on_delivery_order(shopify_order) -> bool:
+	gateway_names = shopify_order.get("payment_gateway_names") or []
+	return any("cash on delivery" in str(gateway).lower() for gateway in gateway_names)
+
+
+def get_cod_fee_tax_row(shopify_order, setting):
+	"""Return a Sales Taxes and Charges row for the COD fee, if configured and applicable."""
+	if not setting.cod_fee_account or not flt(setting.cod_fee_amount):
+		return None
+
+	if not is_cash_on_delivery_order(shopify_order):
+		return None
+
+	return {
+		"charge_type": "Actual",
+		"account_head": setting.cod_fee_account,
+		"description": _("Cash on Delivery Fee"),
+		"tax_amount": setting.cod_fee_amount,
+		"included_in_print_rate": 0,
+		"cost_center": setting.cost_center,
+		"dont_recompute_tax": 1,
+	}
 
 
 def consolidate_order_taxes(taxes):
