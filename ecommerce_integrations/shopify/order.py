@@ -231,13 +231,13 @@ def get_order_taxes(shopify_order, setting, items):
 				}
 			)
 
-	update_taxes_with_shipping_lines(
-		taxes,
-		shopify_order.get("shipping_lines"),
-		setting,
-		items,
-		taxes_inclusive=shopify_order.get("taxes_included"),
-	)
+	# update_taxes_with_shipping_lines(
+	# 	taxes,
+	# 	shopify_order.get("shipping_lines"),
+	# 	setting,
+	# 	items,
+	# 	taxes_inclusive=shopify_order.get("taxes_included"),
+	# )
 
 	cod_fee = get_cod_fee_tax_row(shopify_order, setting)
 	if cod_fee:
