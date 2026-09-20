@@ -131,7 +131,8 @@ def create_sales_order(shopify_order, setting, company=None):
 				"taxes": taxes,
 				"contact_person": contact_person or "",
 				"mobile_no": mobile_no or "",
-				"tax_category": get_dummy_tax_category(),
+				"tax_category": "",
+				# "tax_category": get_dummy_tax_category(),
 			}
 		)
 
